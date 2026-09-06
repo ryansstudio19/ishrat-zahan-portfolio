@@ -90,7 +90,7 @@ button { border: 0; }
 @keyframes intro-spin-reverse { to { transform: rotate(-399deg) scaleX(.4); } }
 @keyframes intro-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .intro-counter { color: var(--gold); }
-@keyframes intro-breathe { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes intro-breathe { from { opacity: 1; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes intro-line { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .ambient-grid { position: fixed; z-index: 0; inset: 0; pointer-events: none; opacity: .14; background-image: linear-gradient(rgba(105,181,151,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(105,181,151,.13) 1px, transparent 1px); background-size: 90px 90px; mask-image: linear-gradient(180deg, rgba(0,0,0,.65), transparent 68%); transform: perspective(700px) rotateX(68deg) translateY(40vh) scale(1.8); transform-origin: center bottom; }
 .ambient-orb { position: fixed; z-index: 0; pointer-events: none; border-radius: 50%; filter: blur(1px); mix-blend-mode: screen; }
@@ -454,8 +454,8 @@ h2 { font-size: clamp(44px, 5vw, 72px); }
 .intro-status-detail { color: var(--muted-deep); }
 .intro-counter { color: var(--gold-soft); font-family: var(--serif); font-size: 24px; font-weight: 500; }
 .intro-counter small { margin-left: 3px; color: var(--muted); font-family: var(--mono); font-size: 9px; }
-@keyframes intro-title-in { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes intro-seal-in { from { opacity: 0; transform: scale(.72) rotate(-18deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
+@keyframes intro-title-in { from { opacity: 1; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes intro-seal-in { from { opacity: 1; transform: scale(.72) rotate(-18deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
 @media (max-width: 680px) {
   .intro-loader-meta { display: none; }
   .intro-loader-center { display: flex; width: 100%; gap: 19px; align-items: flex-start; }
