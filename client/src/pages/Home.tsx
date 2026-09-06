@@ -382,7 +382,7 @@ export default function Home() {
   };
 
   return (
-    <div className="site-shell">
+    <div className={`site-shell ${introComplete ? "" : "intro-active"}`}>
       <div className="grain" aria-hidden="true" />
       <div className={`intro-loader ${introComplete ? "is-complete" : ""}`} aria-hidden={introComplete}>
         <div className="intro-loader-top"><span className="brand-mark">IZ</span><span>Portfolio / 2026</span></div>
@@ -440,7 +440,8 @@ export default function Home() {
             </div>
             <div className="hero-aside hero-side-note">
               <div className="photo-slot photo-slot-hero">
-                <div className="photo-slot-inner"><span>PHOTO SLOT</span><strong>Professional portrait<br />to be added</strong></div>
+                <img className="portrait-image portrait-hero-image" src="/manus-storage/ishrat-zahan-portrait_7e992ace.jpg" alt="Mst. Ishrat Zahan standing outdoors" />
+                <div className="portrait-overlay"><span>MST. ISHRAT ZAHAN</span><strong>Public service<br />with purpose</strong></div>
                 <span className="slot-corner slot-corner-tl" /><span className="slot-corner slot-corner-br" />
               </div>
               <div className="hero-caption"><span className="caption-line" /><span>Gangni · Meherpur<br />Bangladesh</span><MapPin size={15} /></div>
@@ -468,7 +469,7 @@ export default function Home() {
                 ))}
               </div>
               <div className="about-strip">
-                <div className="photo-slot photo-slot-about"><div className="photo-slot-inner"><span>ABOUT / PHOTO SLOT</span><strong>Replace with<br />editorial portrait</strong></div></div>
+                <div className="photo-slot photo-slot-about"><img className="portrait-image portrait-about-image" src="/manus-storage/ishrat-zahan-portrait_7e992ace.jpg" alt="Portrait of Mst. Ishrat Zahan" /><div className="portrait-overlay"><span>ABOUT / PORTRAIT</span></div></div>
                 <div><p className="eyebrow">A considered practice</p><p className="about-copy">Her approach is deliberately connective: translate standards into daily behavior, make compliance legible, and leave every institution stronger than it was found.</p></div>
                 <div className="quote-mark"><Quote size={30} /></div>
               </div>
