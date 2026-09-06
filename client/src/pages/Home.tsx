@@ -322,16 +322,53 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCertificate, setActiveCertificate] = useState<number | null>(null);
   const [formSent, setFormSent] = useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
   const heroRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducedMotion || !heroRef.current) return;
+    const introTimer = window.setTimeout(() => setIntroComplete(true), reducedMotion ? 450 : 1850);
+    if (reducedMotion || !heroRef.current) return () => window.clearTimeout(introTimer);
     const ctx = gsap.context(() => {
       gsap.fromTo(".hero-reveal", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, stagger: 0.09, ease: "power3.out", delay: 0.18 });
       gsap.fromTo(".hero-side-note", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.6 });
+      gsap.utils.toArray<HTMLElement>(".section-padding").forEach((section) => {
+        gsap.fromTo(section.querySelectorAll<HTMLElement>(".section-label, .section-heading-row, .career-item, .about-strip, .credential-card, .certificate-gallery-slot, .expertise-item, .language-panel, .contact-copy, .contact-form"),
+          { y: 34, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.075,
+            ease: "power3.out",
+            scrollTrigger: { trigger: section, start: "top 76%", once: true },
+          },
+        );
+      });
+      gsap.utils.toArray<HTMLElement>(".section-body").forEach((body) => {
+        gsap.to(body, {
+          y: -22,
+          ease: "none",
+          scrollTrigger: { trigger: body, start: "top bottom", end: "bottom top", scrub: true },
+        });
+      });
+      gsap.to(".hero-title", {
+        letterSpacing: "-0.065em",
+        y: -24,
+        ease: "none",
+        scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: true },
+      });
+      gsap.to(".scroll-cue", {
+        opacity: 0,
+        y: 14,
+        ease: "none",
+        scrollTrigger: { trigger: ".hero-section", start: "top top", end: "35% top", scrub: true },
+      });
     }, heroRef);
-    return () => ctx.revert();
+    return () => {
+      window.clearTimeout(introTimer);
+      ctx.revert();
+    };
   }, []);
 
   const scrollTo = (id: string) => {
@@ -347,6 +384,14 @@ export default function Home() {
   return (
     <div className="site-shell">
       <div className="grain" aria-hidden="true" />
+      <div className={`intro-loader ${introComplete ? "is-complete" : ""}`} aria-hidden={introComplete}>
+        <div className="intro-loader-top"><span className="brand-mark">IZ</span><span>Portfolio / 2026</span></div>
+        <div className="intro-loader-center"><span className="intro-kicker">A record of</span><strong>public trust</strong><span className="intro-line" /></div>
+        <div className="intro-loader-bottom"><span>Loading credential atlas</span><span className="intro-counter">04 / 04</span></div>
+      </div>
+      <div className="ambient-orb ambient-orb-one" aria-hidden="true" />
+      <div className="ambient-orb ambient-orb-two" aria-hidden="true" />
+      <div className="ambient-grid" aria-hidden="true" />
       <div className="scene-portal" aria-hidden="true"><CredentialScene /></div>
 
       <header className={`site-header ${menuOpen ? "menu-is-open" : ""}`}>
