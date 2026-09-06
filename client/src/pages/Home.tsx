@@ -560,7 +560,11 @@ export default function Home() {
   useEffect(() => {
     if (!introComplete) return;
     document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
+    const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => {
+      window.cancelAnimationFrame(refreshFrame);
+      document.body.style.overflow = "";
+    };
   }, [introComplete]);
 
   useEffect(() => {
