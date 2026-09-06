@@ -573,9 +573,12 @@ export default function Home() {
       <CustomCursor />
       <div className="grain" aria-hidden="true" />
       <div className={`intro-loader ${introComplete ? "is-complete" : ""}`} aria-hidden={introComplete}>
-        <div className="intro-loader-top"><span className="brand-mark">IZ</span><span>Portfolio / 2026</span></div>
-        <div className="intro-loader-center"><span className="intro-kicker">A record of</span><strong>public trust</strong><span className="intro-line" /></div>
-        <div className="intro-loader-bottom"><span>Loading credential atlas</span><span className="intro-counter">04 / 04</span></div>
+        <div className="intro-loader-top"><span className="brand-mark">IZ</span><span>Personal archive / 2026</span><span className="intro-top-status"><i />Verified profile</span></div>
+        <div className="intro-loader-center">
+          <div className="intro-orbit" aria-hidden="true"><span className="intro-orbit-ring intro-orbit-ring-one" /><span className="intro-orbit-ring intro-orbit-ring-two" /><span className="intro-orbit-ring intro-orbit-ring-three" /><span className="intro-orbit-node intro-node-one" /><span className="intro-orbit-node intro-node-two" /><strong>IZ</strong></div>
+          <div className="intro-copy"><span className="intro-kicker">Mst. Ishrat Zahan</span><strong>Public service,<br /><em>made visible.</em></strong><span className="intro-line" /><p>Food safety · quality assurance<br />Bangladesh</p></div>
+        </div>
+        <div className="intro-loader-bottom"><span>Opening credential atlas</span><span className="intro-progress"><i /></span><span className="intro-counter">04 / 04</span></div>
       </div>
       <ParticleField />
       <div className="ambient-orb ambient-orb-one" aria-hidden="true" />
