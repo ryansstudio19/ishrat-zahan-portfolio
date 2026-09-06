@@ -1,5 +1,5 @@
 import { ArrowUpRight, ChevronRight, Menu, X } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 type SubpageLayoutProps = {
   eyebrow: string;
@@ -8,12 +8,40 @@ type SubpageLayoutProps = {
   children: ReactNode;
 };
 
+function RouteCursor() {
+  const dotRef = useRef<HTMLDivElement | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    const dot = dotRef.current;
+    const ring = ringRef.current;
+    if (!dot || !ring) return;
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    let ringX = x;
+    let ringY = y;
+    let raf = 0;
+    const move = (event: PointerEvent) => { x = event.clientX; y = event.clientY; document.documentElement.classList.add("cursor-is-visible"); };
+    const enter = () => document.documentElement.classList.add("cursor-is-hovering");
+    const leave = () => document.documentElement.classList.remove("cursor-is-hovering");
+    const tick = () => { ringX += (x - ringX) * .13; ringY += (y - ringY) * .13; dot.style.transform = `translate3d(${x}px,${y}px,0)`; ring.style.transform = `translate3d(${ringX}px,${ringY}px,0)`; raf = requestAnimationFrame(tick); };
+    window.addEventListener("pointermove", move, { passive: true });
+    document.querySelectorAll<HTMLElement>("a, button, input, textarea").forEach((element) => { element.addEventListener("pointerenter", enter); element.addEventListener("pointerleave", leave); });
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("pointermove", move); document.documentElement.classList.remove("cursor-is-visible", "cursor-is-hovering"); document.querySelectorAll<HTMLElement>("a, button, input, textarea").forEach((element) => { element.removeEventListener("pointerenter", enter); element.removeEventListener("pointerleave", leave); }); };
+  }, []);
+
+  return <><div ref={dotRef} className="custom-cursor-dot" aria-hidden="true" /><div ref={ringRef} className="custom-cursor-ring" aria-hidden="true"><span /></div></>;
+}
+
 export default function SubpageLayout({ eyebrow, title, intro, children }: SubpageLayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const close = () => setMenuOpen(false);
 
   return (
     <div className="site-shell subpage-shell">
+      <RouteCursor />
       <div className="grain" aria-hidden="true" />
       <header className={`site-header ${menuOpen ? "menu-is-open" : ""}`}>
         <a className="brand" href="/" onClick={close} aria-label="Ishrat Zahan home">

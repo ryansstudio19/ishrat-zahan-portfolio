@@ -497,7 +497,7 @@ export default function Home() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const introDuration = reducedMotion ? 450 : 2200;
+    const introDuration = reducedMotion ? 450 : 3600;
     const introStart = performance.now();
     let progressFrame = 0;
     const updateProgress = (now: number) => {
