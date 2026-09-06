@@ -318,6 +318,114 @@ function CredentialScene() {
   return <div ref={mountRef} className="scene-mount" aria-label="Animated credential seal with orbiting certification rings" role="img" />;
 }
 
+/**
+ * Lightweight canvas atmosphere: isolated from the main Three.js seal so it can
+ * run as a low-cost background layer and remain safe around responsive content.
+ */
+function ParticleField() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d", { alpha: true });
+    if (!context) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const pointer = { x: -1000, y: -1000, active: false };
+    const particles: Array<{ x: number; y: number; z: number; vx: number; vy: number; size: number; hue: number }> = [];
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+
+    const resize = () => {
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.7);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * pixelRatio;
+      canvas.height = height * pixelRatio;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      const targetCount = width < 680 ? 58 : 105;
+      particles.length = 0;
+      for (let i = 0; i < targetCount; i += 1) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          z: 0.35 + Math.random() * 0.9,
+          vx: (Math.random() - 0.5) * 0.11,
+          vy: (Math.random() - 0.5) * 0.11,
+          size: 0.55 + Math.random() * 1.3,
+          hue: Math.random() > 0.7 ? 42 : 158,
+        });
+      }
+    };
+
+    const handlePointer = (event: PointerEvent) => {
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      pointer.active = true;
+    };
+    const clearPointer = () => { pointer.active = false; };
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+    if (!isCoarsePointer) {
+      window.addEventListener("pointermove", handlePointer, { passive: true });
+      window.addEventListener("pointerleave", clearPointer, { passive: true });
+    }
+
+    const render = (time: number) => {
+      context.clearRect(0, 0, width, height);
+      const t = time * 0.00035;
+      particles.forEach((particle) => {
+        if (!reducedMotion) {
+          const dx = particle.x - pointer.x;
+          const dy = particle.y - pointer.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (pointer.active && distance < 190) {
+            const force = (1 - distance / 190) * 0.018;
+            particle.vx += (dx / Math.max(distance, 1)) * force;
+            particle.vy += (dy / Math.max(distance, 1)) * force;
+          }
+          particle.vx += Math.sin(t + particle.y * 0.006) * 0.0007;
+          particle.vy += Math.cos(t + particle.x * 0.005) * 0.0007;
+          particle.vx *= 0.993;
+          particle.vy *= 0.993;
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          if (particle.x < -20) particle.x = width + 20;
+          if (particle.x > width + 20) particle.x = -20;
+          if (particle.y < -20) particle.y = height + 20;
+          if (particle.y > height + 20) particle.y = -20;
+        }
+        const alpha = 0.16 + particle.z * 0.15;
+        const glow = context.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size * 8);
+        glow.addColorStop(0, `hsla(${particle.hue}, 74%, 62%, ${alpha})`);
+        glow.addColorStop(1, `hsla(${particle.hue}, 74%, 62%, 0)`);
+        context.fillStyle = glow;
+        context.fillRect(particle.x - particle.size * 8, particle.y - particle.size * 8, particle.size * 16, particle.size * 16);
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.size * particle.z, 0, Math.PI * 2);
+        context.fillStyle = `hsla(${particle.hue}, 78%, 70%, ${alpha + 0.1})`;
+        context.fill();
+      });
+      frame = window.requestAnimationFrame(render);
+    };
+    frame = window.requestAnimationFrame(render);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", handlePointer);
+      window.removeEventListener("pointerleave", clearPointer);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} id="3d-particles-bg" aria-hidden="true" />;
+}
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCertificate, setActiveCertificate] = useState<number | null>(null);
@@ -371,6 +479,26 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const revealElements = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    if (!revealElements.length) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion || !("IntersectionObserver" in window)) {
+      revealElements.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    revealElements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   const scrollTo = (id: string) => {
     setMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -389,6 +517,7 @@ export default function Home() {
         <div className="intro-loader-center"><span className="intro-kicker">A record of</span><strong>public trust</strong><span className="intro-line" /></div>
         <div className="intro-loader-bottom"><span>Loading credential atlas</span><span className="intro-counter">04 / 04</span></div>
       </div>
+      <ParticleField />
       <div className="ambient-orb ambient-orb-one" aria-hidden="true" />
       <div className="ambient-orb ambient-orb-two" aria-hidden="true" />
       <div className="ambient-grid" aria-hidden="true" />
@@ -450,7 +579,7 @@ export default function Home() {
           <div className="scroll-cue"><span>Scroll to enter the record</span><ChevronDown size={17} /></div>
         </section>
 
-        <section className="intro-section section-padding" id="career">
+        <section className="intro-section section-padding" id="career" data-reveal>
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">01</span><span>Career record</span></div>
             <div className="section-body">
@@ -477,7 +606,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="credentials-section section-padding" id="credentials">
+        <section className="credentials-section section-padding" id="credentials" data-reveal>
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">02</span><span>Credential atlas</span></div>
             <div className="section-body">
@@ -499,7 +628,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="expertise-section section-padding" id="expertise">
+        <section className="expertise-section section-padding" id="expertise" data-reveal>
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">03</span><span>Expertise / languages</span></div>
             <div className="section-body">
@@ -512,7 +641,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="contact-section section-padding" id="contact">
+        <section className="contact-section section-padding" id="contact" data-reveal>
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">04</span><span>Contact</span></div>
             <div className="section-body contact-layout">
