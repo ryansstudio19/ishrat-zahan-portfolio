@@ -589,10 +589,10 @@ export default function Home() {
           <span className="brand-name">Ishrat Zahan</span>
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
-          <a href="#career">Career</a>
-          <a href="#credentials">Credentials</a>
-          <a href="#expertise">Expertise</a>
-          <a href="#contact">Contact</a>
+          <a href="/career">Career</a>
+          <a href="/awards-certificates">Awards &amp; certificates</a>
+          <a href="/expertise">Expertise</a>
+          <a href="/contact">Contact</a>
         </nav>
         <div className="header-actions">
           <span className="availability"><span className="status-dot" /> Available for advisory work</span>
@@ -602,10 +602,10 @@ export default function Home() {
         </div>
         {menuOpen && (
           <nav className="mobile-nav" aria-label="Mobile navigation">
-            <a href="#career" onClick={() => setMenuOpen(false)}>Career <ArrowUpRight size={15} /></a>
-            <a href="#credentials" onClick={() => setMenuOpen(false)}>Credentials <ArrowUpRight size={15} /></a>
-            <a href="#expertise" onClick={() => setMenuOpen(false)}>Expertise <ArrowUpRight size={15} /></a>
-            <a href="#contact" onClick={() => setMenuOpen(false)}>Contact <ArrowUpRight size={15} /></a>
+            <a href="/career" onClick={() => setMenuOpen(false)}>Career <ArrowUpRight size={15} /></a>
+            <a href="/awards-certificates" onClick={() => setMenuOpen(false)}>Awards &amp; certificates <ArrowUpRight size={15} /></a>
+            <a href="/expertise" onClick={() => setMenuOpen(false)}>Expertise <ArrowUpRight size={15} /></a>
+            <a href="/contact" onClick={() => setMenuOpen(false)}>Contact <ArrowUpRight size={15} /></a>
           </nav>
         )}
       </header>
