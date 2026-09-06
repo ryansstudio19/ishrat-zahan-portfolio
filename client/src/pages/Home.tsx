@@ -103,8 +103,10 @@ function CredentialScene() {
     const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
     camera.position.set(0, 0, 8.4);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const isSmallViewport = window.matchMedia("(max-width: 680px)").matches;
+    const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isSmallViewport, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmallViewport || isCoarsePointer ? 1.35 : 2));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     mount.appendChild(renderer.domElement);
@@ -224,7 +226,7 @@ function CredentialScene() {
       root.add(group);
     });
 
-    const particleCount = 240;
+    const particleCount = isSmallViewport || isCoarsePointer ? 105 : 240;
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i += 1) {
       const i3 = i * 3;
