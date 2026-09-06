@@ -104,6 +104,8 @@ button { border: 0; }
 .scene-mount, .scene-mount canvas { display: block; width: 100%; height: 100%; }
 .scene-portal::before { content: ""; position: absolute; inset: 12% 12% 8% 18%; background: radial-gradient(closest-side, rgba(55,116,90,.16), transparent 68%); filter: blur(26px); }
 .site-header, main, .site-footer { position: relative; z-index: 2; }
+.site-shell.intro-active > .site-header, .site-shell.intro-active > main, .site-shell.intro-active > .site-footer { opacity: .13; filter: blur(6px); transform: scale(.985); transition: opacity .8s ease, filter .8s ease, transform 1s var(--ease-out); }
+.site-shell:not(.intro-active) > .site-header, .site-shell:not(.intro-active) > main, .site-shell:not(.intro-active) > .site-footer { transition: opacity .8s ease, filter .8s ease, transform 1s var(--ease-out); }
 .site-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 0 4.8vw; border-bottom: 1px solid rgba(233,227,213,.12); background: linear-gradient(180deg, rgba(10,17,16,.85), rgba(10,17,16,.2)); backdrop-filter: blur(16px); }
 .brand, .footer-brand { display: inline-flex; align-items: center; gap: 11px; }
 .brand-mark { display: inline-grid; place-items: center; width: 31px; height: 31px; border: 1px solid rgba(213,173,98,.75); color: var(--gold-soft); font-family: var(--serif); font-size: 12px; letter-spacing: -.08em; }

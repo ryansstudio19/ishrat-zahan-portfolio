@@ -494,8 +494,13 @@ export default function Home() {
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const introTimer = window.setTimeout(() => setIntroComplete(true), reducedMotion ? 450 : 1850);
-    if (reducedMotion || !heroRef.current) return () => window.clearTimeout(introTimer);
+    if (reducedMotion || !heroRef.current) return () => {
+      document.body.style.overflow = previousOverflow;
+      window.clearTimeout(introTimer);
+    };
     const ctx = gsap.context(() => {
       gsap.fromTo(".hero-reveal", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, stagger: 0.09, ease: "power3.out", delay: 0.18 });
       gsap.fromTo(".hero-side-note", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.6 });
@@ -533,10 +538,17 @@ export default function Home() {
       });
     }, heroRef);
     return () => {
+      document.body.style.overflow = previousOverflow;
       window.clearTimeout(introTimer);
       ctx.revert();
     };
   }, []);
+
+  useEffect(() => {
+    if (!introComplete) return;
+    document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [introComplete]);
 
   useEffect(() => {
     const revealElements = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
