@@ -490,16 +490,28 @@ export default function Home() {
   const [activeCertificate, setActiveCertificate] = useState<number | null>(null);
   const [formSent, setFormSent] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
+  const [introProgress, setIntroProgress] = useState(0);
   const heroRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const introTimer = window.setTimeout(() => setIntroComplete(true), reducedMotion ? 450 : 1850);
+    const introDuration = reducedMotion ? 450 : 2200;
+    const introStart = performance.now();
+    let progressFrame = 0;
+    const updateProgress = (now: number) => {
+      const rawProgress = Math.min((now - introStart) / introDuration, 1);
+      const easedProgress = 1 - Math.pow(1 - rawProgress, 3);
+      setIntroProgress(Math.round(easedProgress * 100));
+      if (rawProgress < 1) progressFrame = window.requestAnimationFrame(updateProgress);
+    };
+    progressFrame = window.requestAnimationFrame(updateProgress);
+    const introTimer = window.setTimeout(() => setIntroComplete(true), introDuration);
     if (reducedMotion || !heroRef.current) return () => {
       document.body.style.overflow = previousOverflow;
       window.clearTimeout(introTimer);
+      window.cancelAnimationFrame(progressFrame);
     };
     const ctx = gsap.context(() => {
       gsap.fromTo(".hero-reveal", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, stagger: 0.09, ease: "power3.out", delay: 0.18 });
@@ -540,6 +552,7 @@ export default function Home() {
     return () => {
       document.body.style.overflow = previousOverflow;
       window.clearTimeout(introTimer);
+      window.cancelAnimationFrame(progressFrame);
       ctx.revert();
     };
   }, []);
@@ -580,17 +593,22 @@ export default function Home() {
     setFormSent(true);
   };
 
+  const introStatus = introProgress < 35 ? "Initializing archive" : introProgress < 75 ? "Mapping credentials" : "Opening experience";
+
   return (
     <div className={`site-shell ${introComplete ? "" : "intro-active"}`}>
       <CustomCursor />
       <div className="grain" aria-hidden="true" />
       <div className={`intro-loader ${introComplete ? "is-complete" : ""}`} aria-hidden={introComplete}>
-        <div className="intro-loader-top"><span className="brand-mark">IZ</span><span>Personal archive / 2026</span><span className="intro-top-status"><i />Verified profile</span></div>
+        <div className="intro-loader-top"><span className="brand-mark">IZ</span><span className="intro-loader-meta">ISH / 001 — PORTFOLIO SYSTEM</span><span className="intro-top-status"><i />Live / Bangladesh</span></div>
         <div className="intro-loader-center">
+          <div className="intro-kicker"><span>Senior public administrator</span><span>Food safety &amp; quality assurance</span></div>
+          <div className="intro-loader-title"><span className="intro-title-line">Mst. Ishrat</span><span className="intro-title-line intro-title-accent">Zahan</span></div>
+          <div className="intro-loader-rule" />
+          <p className="intro-loader-subtitle">A considered record of<br /><em>public trust.</em></p>
           <div className="intro-orbit" aria-hidden="true"><span className="intro-orbit-ring intro-orbit-ring-one" /><span className="intro-orbit-ring intro-orbit-ring-two" /><span className="intro-orbit-ring intro-orbit-ring-three" /><span className="intro-orbit-node intro-node-one" /><span className="intro-orbit-node intro-node-two" /><strong>IZ</strong></div>
-          <div className="intro-copy"><span className="intro-kicker">Mst. Ishrat Zahan</span><strong>Public service,<br /><em>made visible.</em></strong><span className="intro-line" /><p>Food safety · quality assurance<br />Bangladesh</p></div>
         </div>
-        <div className="intro-loader-bottom"><span>Opening credential atlas</span><span className="intro-progress"><i /></span><span className="intro-counter">04 / 04</span></div>
+        <div className="intro-loader-bottom"><div className="intro-loader-status"><span>Preparing portfolio</span><span className="intro-status-detail">{introStatus}</span></div><span className="intro-progress"><i style={{ transform: `scaleX(${introProgress / 100})` }} /></span><strong className="intro-counter">{String(introProgress).padStart(2, "0")}<small>%</small></strong></div>
       </div>
       <ParticleField />
       <div className="ambient-orb ambient-orb-one" aria-hidden="true" />
