@@ -482,3 +482,14 @@ h2 { font-size: clamp(44px, 5vw, 72px); }
   .intro-loader-center { animation-name: intro-center-in-mobile; }
 }
 @keyframes intro-center-in-mobile { from { opacity: 1; transform: translateY(-50%) scale(.97); } to { opacity: 1; transform: translateY(-50%) scale(1); } }
+
+/* Final loader guard: the composition is always visible; only its children animate. */
+.intro-loader { overflow: hidden; }
+.intro-loader-center { z-index: 4 !important; opacity: 1 !important; visibility: visible !important; animation: none !important; transform: translate(-50%, -50%) !important; }
+.intro-loader-center > * { opacity: 1 !important; visibility: visible !important; }
+@media (max-width: 680px) {
+  .intro-loader-center { transform: translateY(-50%) !important; }
+}
+
+/* Use the actual viewport, not the document scroll height, for the loading screen. */
+.intro-loader { inset: 0 0 auto; height: 100vh; height: 100dvh; min-height: 0; max-height: 100dvh; }
