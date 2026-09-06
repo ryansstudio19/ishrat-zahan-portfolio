@@ -493,3 +493,6 @@ h2 { font-size: clamp(44px, 5vw, 72px); }
 
 /* Use the actual viewport, not the document scroll height, for the loading screen. */
 .intro-loader { inset: 0 0 auto; height: 100vh; height: 100dvh; min-height: 0; max-height: 100dvh; }
+
+/* Scroll is intentionally plain: keep all content visible without reveal gating. */
+.section-padding[data-reveal] { opacity: 1; transform: none; transition: none; }

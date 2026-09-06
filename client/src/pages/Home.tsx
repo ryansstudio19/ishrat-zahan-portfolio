@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -25,8 +24,6 @@ import {
   Wheat,
   X,
 } from "lucide-react";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const credentials = [
   {
@@ -262,28 +259,6 @@ function CredentialScene() {
     resize();
     window.addEventListener("resize", resize);
 
-    const scrollTrigger = reducedMotion
-      ? null
-      : ScrollTrigger.create({
-          start: 0,
-          end: "max",
-          scrub: true,
-          onUpdate: ({ progress }) => {
-            root.position.y = -progress * 0.75;
-            root.position.x = progress * 0.42;
-            root.rotation.z = -0.08 + progress * 0.72;
-            root.rotation.x = -0.06 + progress * 0.18;
-            root.scale.setScalar(1 - progress * 0.22);
-            const opacity = 0.96 - progress * 0.48;
-            root.traverse((object) => {
-              const material = (object as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
-              if (Array.isArray(material)) material.forEach((item) => (item.opacity = opacity));
-              else if (material && "opacity" in material) material.opacity = opacity;
-            });
-            particles.material.opacity = 0.55 - progress * 0.24;
-          },
-        });
-
     let animationFrame = 0;
     const clock = new THREE.Clock();
     const animate = () => {
@@ -309,7 +284,6 @@ function CredentialScene() {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("pointermove", handlePointer);
       window.removeEventListener("resize", resize);
-      scrollTrigger?.kill();
       sealTexture.dispose();
       particleGeometry.dispose();
       renderer.dispose();
@@ -505,53 +479,19 @@ export default function Home() {
       const easedProgress = 1 - Math.pow(1 - rawProgress, 3);
       setIntroProgress(Math.round(easedProgress * 100));
       if (rawProgress < 1) progressFrame = window.requestAnimationFrame(updateProgress);
+      else setIntroComplete(true);
     };
     progressFrame = window.requestAnimationFrame(updateProgress);
-    const introTimer = window.setTimeout(() => setIntroComplete(true), introDuration);
     if (reducedMotion || !heroRef.current) return () => {
       document.body.style.overflow = previousOverflow;
-      window.clearTimeout(introTimer);
       window.cancelAnimationFrame(progressFrame);
     };
     const ctx = gsap.context(() => {
       gsap.fromTo(".hero-reveal", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, stagger: 0.09, ease: "power3.out", delay: 0.18 });
       gsap.fromTo(".hero-side-note", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.6 });
-      gsap.utils.toArray<HTMLElement>(".section-padding").forEach((section) => {
-        gsap.fromTo(section.querySelectorAll<HTMLElement>(".section-label, .section-heading-row, .career-item, .about-strip, .credential-card, .certificate-gallery-slot, .expertise-item, .language-panel, .contact-copy, .contact-form"),
-          { y: 34, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            stagger: 0.075,
-            ease: "power3.out",
-            scrollTrigger: { trigger: section, start: "top 76%", once: true },
-          },
-        );
-      });
-      gsap.utils.toArray<HTMLElement>(".section-body").forEach((body) => {
-        gsap.to(body, {
-          y: -22,
-          ease: "none",
-          scrollTrigger: { trigger: body, start: "top bottom", end: "bottom top", scrub: true },
-        });
-      });
-      gsap.to(".hero-title", {
-        letterSpacing: "-0.065em",
-        y: -24,
-        ease: "none",
-        scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: true },
-      });
-      gsap.to(".scroll-cue", {
-        opacity: 0,
-        y: 14,
-        ease: "none",
-        scrollTrigger: { trigger: ".hero-section", start: "top top", end: "35% top", scrub: true },
-      });
     }, heroRef);
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.clearTimeout(introTimer);
       window.cancelAnimationFrame(progressFrame);
       ctx.revert();
     };
@@ -560,32 +500,10 @@ export default function Home() {
   useEffect(() => {
     if (!introComplete) return;
     document.body.style.overflow = "";
-    const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
     return () => {
-      window.cancelAnimationFrame(refreshFrame);
       document.body.style.overflow = "";
     };
   }, [introComplete]);
-
-  useEffect(() => {
-    const revealElements = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    if (!revealElements.length) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducedMotion || !("IntersectionObserver" in window)) {
-      revealElements.forEach((element) => element.classList.add("is-visible"));
-      return;
-    }
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
-    revealElements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
-  }, []);
 
   const scrollTo = (id: string) => {
     setMenuOpen(false);
@@ -676,7 +594,7 @@ export default function Home() {
           <div className="scroll-cue"><span>Scroll to enter the record</span><ChevronDown size={17} /></div>
         </section>
 
-        <section className="intro-section section-padding" id="career" data-reveal>
+        <section className="intro-section section-padding" id="career">
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">01</span><span>Career record</span></div>
             <div className="section-body">
@@ -703,7 +621,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="credentials-section section-padding" id="credentials" data-reveal>
+        <section className="credentials-section section-padding" id="credentials">
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">02</span><span>Credential atlas</span></div>
             <div className="section-body">
@@ -725,7 +643,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="expertise-section section-padding" id="expertise" data-reveal>
+        <section className="expertise-section section-padding" id="expertise">
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">03</span><span>Expertise / languages</span></div>
             <div className="section-body">
@@ -738,7 +656,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="contact-section section-padding" id="contact" data-reveal>
+        <section className="contact-section section-padding" id="contact">
           <div className="site-container section-grid">
             <div className="section-label"><span className="section-number">04</span><span>Contact</span></div>
             <div className="section-body contact-layout">
