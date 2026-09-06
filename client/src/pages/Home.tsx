@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -24,6 +25,8 @@ import {
   Wheat,
   X,
 } from "lucide-react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const credentials = [
   {
@@ -259,6 +262,26 @@ function CredentialScene() {
     resize();
     window.addEventListener("resize", resize);
 
+    const scrollTrigger = reducedMotion ? null : ScrollTrigger.create({
+      start: 0,
+      end: "max",
+      scrub: true,
+      onUpdate: ({ progress }) => {
+        root.position.y = -progress * 0.75;
+        root.position.x = progress * 0.42;
+        root.rotation.z = -0.08 + progress * 0.72;
+        root.rotation.x = -0.06 + progress * 0.18;
+        root.scale.setScalar(1 - progress * 0.22);
+        const opacity = 0.96 - progress * 0.48;
+        root.traverse((object) => {
+          const material = (object as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
+          if (Array.isArray(material)) material.forEach((item) => (item.opacity = opacity));
+          else if (material && "opacity" in material) material.opacity = opacity;
+        });
+        particles.material.opacity = 0.55 - progress * 0.24;
+      },
+    });
+
     let animationFrame = 0;
     const clock = new THREE.Clock();
     const animate = () => {
@@ -284,6 +307,7 @@ function CredentialScene() {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("pointermove", handlePointer);
       window.removeEventListener("resize", resize);
+      scrollTrigger?.kill();
       sealTexture.dispose();
       particleGeometry.dispose();
       renderer.dispose();
@@ -519,7 +543,6 @@ export default function Home() {
 
   return (
     <div className={`site-shell ${introComplete ? "" : "intro-active"}`}>
-      <CustomCursor />
       <div className="grain" aria-hidden="true" />
       <div className={`intro-loader ${introComplete ? "is-complete" : ""}`} aria-hidden={introComplete}>
         <div className="intro-loader-top"><span className="brand-mark">IZ</span><span className="intro-loader-meta">ISH / 001 — PORTFOLIO SYSTEM</span><span className="intro-top-status"><i />Live / Bangladesh</span></div>
@@ -591,7 +614,6 @@ export default function Home() {
               <div className="hero-caption"><span className="caption-line" /><span>Gangni · Meherpur<br />Bangladesh</span><MapPin size={15} /></div>
             </div>
           </div>
-          <div className="scroll-cue"><span>Scroll to enter the record</span><ChevronDown size={17} /></div>
         </section>
 
         <section className="intro-section section-padding" id="career">

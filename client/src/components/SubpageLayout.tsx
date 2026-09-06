@@ -41,7 +41,6 @@ export default function SubpageLayout({ eyebrow, title, intro, children }: Subpa
 
   return (
     <div className="site-shell subpage-shell">
-      <RouteCursor />
       <div className="grain" aria-hidden="true" />
       <header className={`site-header ${menuOpen ? "menu-is-open" : ""}`}>
         <a className="brand" href="/" onClick={close} aria-label="Ishrat Zahan home">
