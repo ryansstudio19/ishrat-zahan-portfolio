@@ -468,3 +468,17 @@ h2 { font-size: clamp(44px, 5vw, 72px); }
 @media (prefers-reduced-motion: reduce) {
   .intro-title-line, .intro-loader-center > .intro-orbit { animation: none; }
 }
+
+/* Loader stability: keep the identity lockup in view from frame one */
+.intro-loader-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.intro-loader-title, .intro-loader-subtitle, .intro-loader-rule, .intro-loader-center > .intro-kicker { position: relative; z-index: 2; }
+@media (max-width: 680px) {
+  .intro-loader-center { top: 50%; left: 5vw; width: 90vw; transform: translateY(-50%); }
+}
+
+.intro-loader-center { animation: intro-center-in 1.2s var(--ease-out) both; }
+@keyframes intro-center-in { from { opacity: 1; transform: translate(-50%, -50%) scale(.97); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@media (max-width: 680px) {
+  .intro-loader-center { animation-name: intro-center-in-mobile; }
+}
+@keyframes intro-center-in-mobile { from { opacity: 1; transform: translateY(-50%) scale(.97); } to { opacity: 1; transform: translateY(-50%) scale(1); } }
