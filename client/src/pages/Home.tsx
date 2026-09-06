@@ -426,6 +426,63 @@ function ParticleField() {
   return <canvas ref={canvasRef} id="3d-particles-bg" aria-hidden="true" />;
 }
 
+function CustomCursor() {
+  const cursorRef = useRef<HTMLDivElement | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    if (!finePointer) return;
+    const cursor = cursorRef.current;
+    const ring = ringRef.current;
+    if (!cursor || !ring) return;
+
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let ringX = targetX;
+    let ringY = targetY;
+    let frame = 0;
+
+    const move = (event: PointerEvent) => {
+      targetX = event.clientX;
+      targetY = event.clientY;
+      document.documentElement.classList.add("cursor-is-visible");
+    };
+    const leave = () => document.documentElement.classList.remove("cursor-is-visible");
+    const enterInteractive = () => document.documentElement.classList.add("cursor-is-hovering");
+    const leaveInteractive = () => document.documentElement.classList.remove("cursor-is-hovering");
+
+    const animate = () => {
+      ringX += (targetX - ringX) * 0.13;
+      ringY += (targetY - ringY) * 0.13;
+      cursor.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`;
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerleave", leave, { passive: true });
+    document.querySelectorAll<HTMLElement>("a, button, input, textarea, [data-cursor]").forEach((element) => {
+      element.addEventListener("pointerenter", enterInteractive, { passive: true });
+      element.addEventListener("pointerleave", leaveInteractive, { passive: true });
+    });
+    frame = window.requestAnimationFrame(animate);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerleave", leave);
+      document.documentElement.classList.remove("cursor-is-visible", "cursor-is-hovering");
+      document.querySelectorAll<HTMLElement>("a, button, input, textarea, [data-cursor]").forEach((element) => {
+        element.removeEventListener("pointerenter", enterInteractive);
+        element.removeEventListener("pointerleave", leaveInteractive);
+      });
+    };
+  }, []);
+
+  return <><div ref={cursorRef} className="custom-cursor-dot" aria-hidden="true" /><div ref={ringRef} className="custom-cursor-ring" aria-hidden="true"><span /></div></>;
+}
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCertificate, setActiveCertificate] = useState<number | null>(null);
@@ -511,6 +568,7 @@ export default function Home() {
 
   return (
     <div className={`site-shell ${introComplete ? "" : "intro-active"}`}>
+      <CustomCursor />
       <div className="grain" aria-hidden="true" />
       <div className={`intro-loader ${introComplete ? "is-complete" : ""}`} aria-hidden={introComplete}>
         <div className="intro-loader-top"><span className="brand-mark">IZ</span><span>Portfolio / 2026</span></div>
