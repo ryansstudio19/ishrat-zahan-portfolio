@@ -496,3 +496,17 @@ h2 { font-size: clamp(44px, 5vw, 72px); }
 
 /* Scroll is intentionally plain: keep all content visible without reveal gating. */
 .section-padding[data-reveal] { opacity: 1; transform: none; transition: none; }
+
+.contact-official { display: grid; gap: 16px; margin-top: 30px; padding-top: 22px; border-top: 1px solid rgba(233,227,213,.14); }
+.official-name, .official-line { display: flex; align-items: flex-start; gap: 12px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.official-name svg, .official-line svg { flex: 0 0 auto; margin-top: 3px; color: var(--gold); }
+.official-name strong { display: block; color: var(--paper); font-family: var(--serif); font-size: 25px; font-weight: 500; line-height: 1.1; }
+.official-name span { display: block; margin-top: 4px; color: var(--gold-soft); font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+.official-line a { color: var(--paper); text-decoration: none; transition: color .2s ease; }
+.official-line a:hover { color: var(--gold-soft); }
+.official-line small { color: var(--muted-deep); }
+@media (max-width: 680px) {
+  .contact-official { gap: 14px; margin-top: 25px; }
+  .official-name strong { font-size: 23px; }
+  .official-line { font-size: 12px; }
+}
