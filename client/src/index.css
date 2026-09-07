@@ -106,7 +106,7 @@ button { border: 0; }
 .site-header, main, .site-footer { position: relative; z-index: 2; }
 .site-shell.intro-active > .site-header, .site-shell.intro-active > main, .site-shell.intro-active > .site-footer { opacity: .13; filter: blur(6px); transform: scale(.985); transition: opacity .8s ease, filter .8s ease, transform 1s var(--ease-out); }
 .site-shell:not(.intro-active) > .site-header, .site-shell:not(.intro-active) > main, .site-shell:not(.intro-active) > .site-footer { transition: opacity .8s ease, filter .8s ease, transform 1s var(--ease-out); }
-.site-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 0 4.8vw; border-bottom: 1px solid rgba(233,227,213,.12); background: linear-gradient(180deg, rgba(10,17,16,.85), rgba(10,17,16,.2)); backdrop-filter: blur(16px); }
+.site-header { position: relative; isolation: isolate; z-index: 100; min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 0 4.8vw; border-bottom: 1px solid rgba(233,227,213,.12); background: linear-gradient(180deg, rgba(10,17,16,.85), rgba(10,17,16,.2)); backdrop-filter: blur(16px); }
 .brand, .footer-brand { display: inline-flex; align-items: center; gap: 11px; }
 .brand-mark { display: inline-grid; place-items: center; width: 31px; height: 31px; border: 1px solid rgba(213,173,98,.75); color: var(--gold-soft); font-family: var(--serif); font-size: 12px; letter-spacing: -.08em; }
 .brand-name, .footer-brand > span:last-child { font-size: 11px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
@@ -116,7 +116,7 @@ button { border: 0; }
 .header-actions { display: flex; align-items: center; gap: 16px; }
 .availability { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-family: var(--mono); font-size: 9px; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
 .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-bright); box-shadow: 0 0 0 4px rgba(105,181,151,.12), 0 0 14px rgba(105,181,151,.6); }
-.menu-button { display: none; width: 35px; height: 35px; place-items: center; color: var(--paper); background: transparent; border: 1px solid var(--border); }
+.menu-button { display: none; width: 35px; height: 35px; place-items: center; color: var(--paper); background: transparent; border: 1px solid var(--border); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .mobile-nav { display: none; }
 
 .site-container { width: min(1200px, 90vw); margin: 0 auto; }
@@ -281,13 +281,13 @@ h2 { font-size: clamp(44px, 5vw, 72px); }
   .intro-copy > strong { font-size: clamp(45px, 14vw, 68px); }
   .intro-copy p { font-size: 8px; }
   .intro-progress { width: 75px; }
-  .site-header { min-height: 64px; padding: env(safe-area-inset-top) 5vw 0; }
+  .site-header { position: sticky; top: 0; min-height: 64px; padding: env(safe-area-inset-top) 5vw 0; z-index: 100; }
   .brand-name { font-size: 10px; }
   .desktop-nav, .availability { display: none; }
-  .menu-button { display: grid; }
+  .menu-button { position: relative; z-index: 3; display: grid; min-width: 44px; min-height: 44px; }
   .site-header.menu-is-open { background: rgba(10,17,16,.98); }
-  .mobile-nav { position: absolute; top: 64px; right: 0; left: 0; display: flex; flex-direction: column; padding: 10px 5vw 20px; border-bottom: 1px solid var(--border); background: rgba(10,17,16,.98); }
-  .mobile-nav a { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid rgba(233,227,213,.1); }
+  .mobile-nav { position: absolute; z-index: 2; top: 100%; right: 0; left: 0; display: flex; flex-direction: column; padding: 10px 5vw calc(20px + env(safe-area-inset-bottom)); border-bottom: 1px solid var(--border); background: rgba(10,17,16,.99); box-shadow: 0 18px 34px rgba(0,0,0,.28); pointer-events: auto; touch-action: manipulation; }
+  .mobile-nav a { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding: 14px 0; border-bottom: 1px solid rgba(233,227,213,.1); touch-action: manipulation; -webkit-tap-highlight-color: rgba(213,173,98,.18); }
   .scene-portal { top: 64px; right: -27vw; width: 105vw; height: 460px; opacity: .5; }
   .hero-section { min-height: 780px; align-items: flex-start; padding: 94px 0 90px; }
   .hero-grid { display: block; }
