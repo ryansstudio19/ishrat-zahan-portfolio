@@ -105,8 +105,8 @@ function CredentialScene() {
 
     const isSmallViewport = window.matchMedia("(max-width: 680px)").matches;
     const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isSmallViewport, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmallViewport || isCoarsePointer ? 1.35 : 2));
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isSmallViewport && !isCoarsePointer, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmallViewport || isCoarsePointer ? 1 : 1.75));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     mount.appendChild(renderer.domElement);
@@ -184,9 +184,10 @@ function CredentialScene() {
     seal.position.z = 0.24;
     root.add(seal);
 
-    const outerRing = new THREE.Mesh(new THREE.TorusGeometry(1.82, 0.024, 10, 144), deepBronze);
+    const ringSegments = isSmallViewport || isCoarsePointer ? 72 : 144;
+    const outerRing = new THREE.Mesh(new THREE.TorusGeometry(1.82, 0.024, 8, ringSegments), deepBronze);
     root.add(outerRing);
-    const innerRing = new THREE.Mesh(new THREE.TorusGeometry(1.36, 0.012, 8, 128), new THREE.MeshBasicMaterial({ color: 0xe7c277, transparent: true, opacity: 0.75 }));
+    const innerRing = new THREE.Mesh(new THREE.TorusGeometry(1.36, 0.012, 6, isSmallViewport || isCoarsePointer ? 64 : 128), new THREE.MeshBasicMaterial({ color: 0xe7c277, transparent: true, opacity: 0.75 }));
     innerRing.position.z = 0.16;
     root.add(innerRing);
 
@@ -205,18 +206,18 @@ function CredentialScene() {
       group.rotation.set(tilt[0], tilt[1], tilt[2]);
       const radius = 2.07 + index * 0.16;
       const ringMaterial = new THREE.MeshBasicMaterial({ color: ringTints[index], transparent: true, opacity: 0.58 });
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, index % 2 === 0 ? 0.016 : 0.01, 8, 160), ringMaterial);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, index % 2 === 0 ? 0.016 : 0.01, 6, isSmallViewport || isCoarsePointer ? 72 : 160), ringMaterial);
       group.add(ring);
 
       const node = new THREE.Mesh(
-        new THREE.SphereGeometry(index === 0 ? 0.075 : 0.055, 16, 16),
+        new THREE.SphereGeometry(index === 0 ? 0.075 : 0.055, isSmallViewport || isCoarsePointer ? 8 : 16, isSmallViewport || isCoarsePointer ? 8 : 16),
         new THREE.MeshBasicMaterial({ color: ringTints[index], transparent: true, opacity: 0.95 }),
       );
       node.position.set(radius, 0, 0);
       group.add(node);
 
       const nodeGlow = new THREE.Mesh(
-        new THREE.SphereGeometry(index === 0 ? 0.15 : 0.12, 16, 16),
+        new THREE.SphereGeometry(index === 0 ? 0.15 : 0.12, isSmallViewport || isCoarsePointer ? 8 : 16, isSmallViewport || isCoarsePointer ? 8 : 16),
         new THREE.MeshBasicMaterial({ color: ringTints[index], transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending }),
       );
       nodeGlow.position.copy(node.position);
@@ -226,7 +227,7 @@ function CredentialScene() {
       root.add(group);
     });
 
-    const particleCount = isSmallViewport || isCoarsePointer ? 105 : 240;
+    const particleCount = isSmallViewport || isCoarsePointer ? 56 : 240;
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i += 1) {
       const i3 = i * 3;
@@ -250,7 +251,7 @@ function CredentialScene() {
       pointerX = (event.clientX / window.innerWidth - 0.5) * 2;
       pointerY = (event.clientY / window.innerHeight - 0.5) * 2;
     };
-    window.addEventListener("pointermove", handlePointer, { passive: true });
+    if (!isCoarsePointer) window.addEventListener("pointermove", handlePointer, { passive: true });
 
     const resize = () => {
       const width = mount.clientWidth || window.innerWidth;
@@ -283,8 +284,23 @@ function CredentialScene() {
     });
 
     let animationFrame = 0;
+    let isPageVisible = document.visibilityState === "visible";
+    let isSceneVisible = true;
+    let frameSkip = 0;
+    const handleVisibility = () => { isPageVisible = document.visibilityState === "visible"; };
+    const sceneObserver = "IntersectionObserver" in window ? new IntersectionObserver(([entry]) => { isSceneVisible = entry.isIntersecting; }) : null;
+    sceneObserver?.observe(mount);
+    document.addEventListener("visibilitychange", handleVisibility);
     const clock = new THREE.Clock();
     const animate = () => {
+      if (!isPageVisible || !isSceneVisible) {
+        animationFrame = window.requestAnimationFrame(animate);
+        return;
+      }
+      if ((isSmallViewport || isCoarsePointer) && frameSkip++ % 2 === 1) {
+        animationFrame = window.requestAnimationFrame(animate);
+        return;
+      }
       const elapsed = clock.getElapsedTime();
       if (!reducedMotion) {
         ringGroups.forEach((group) => {
@@ -306,6 +322,8 @@ function CredentialScene() {
     return () => {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("pointermove", handlePointer);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      sceneObserver?.disconnect();
       window.removeEventListener("resize", resize);
       scrollTrigger?.kill();
       sealTexture.dispose();
@@ -340,15 +358,15 @@ function ParticleField() {
     let frame = 0;
 
     const resize = () => {
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.7);
       width = window.innerWidth;
       height = window.innerHeight;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, width < 680 || isCoarsePointer ? 1 : 1.5);
       canvas.width = width * pixelRatio;
       canvas.height = height * pixelRatio;
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      const targetCount = width < 680 ? 58 : 105;
+      const targetCount = width < 680 ? 32 : 105;
       particles.length = 0;
       for (let i = 0; i < targetCount; i += 1) {
         particles.push({
@@ -376,7 +394,15 @@ function ParticleField() {
       window.addEventListener("pointerleave", clearPointer, { passive: true });
     }
 
+    let renderTick = 0;
+    let pageVisible = document.visibilityState === "visible";
+    const handleVisibility = () => { pageVisible = document.visibilityState === "visible"; };
+    document.addEventListener("visibilitychange", handleVisibility);
     const render = (time: number) => {
+      if (!pageVisible || (width < 680 && renderTick++ % 2 === 1)) {
+        frame = window.requestAnimationFrame(render);
+        return;
+      }
       context.clearRect(0, 0, width, height);
       const t = time * 0.00035;
       particles.forEach((particle) => {
@@ -417,6 +443,7 @@ function ParticleField() {
 
     return () => {
       window.cancelAnimationFrame(frame);
+      document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", handlePointer);
       window.removeEventListener("pointerleave", clearPointer);
