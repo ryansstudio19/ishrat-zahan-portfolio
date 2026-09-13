@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (request.auth.token.email == "siyamisaba@gmail.com" || request.auth.token.email == "ryantasinff@gmail.com") && request.auth.token.email_verified == true;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+        data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128 &&
+        data.email is string && data.email.size() > 0 && data.email.size() <= 150;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['name', 'email', 'subject', 'message', 'createdAt']) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.email is string && data.email.size() > 0 && data.email.size() <= 150 &&
+        data.subject is string && data.subject.size() > 0 && data.subject.size() <= 200 &&
+        data.message is string && data.message.size() > 0 && data.message.size() <= 2000 &&
+        data.createdAt is timestamp;
+    }
+
+    // Connection health check verification
+    match /test/{testId} {
+      allow read: if true;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming()) && incoming().uid == request.auth.uid;
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming()) && incoming().uid == existing().uid;
+      allow delete: if isAdmin();
+    }
+
+    // Contact form inquiries
+    match /inquiries/{inquiryId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(inquiryId) && isValidInquiry(incoming()) && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+  }
+}

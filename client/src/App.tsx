@@ -6,6 +6,7 @@ import Contact from "./pages/Contact";
 import Expertise from "./pages/Expertise";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function PageTransition({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -24,12 +25,18 @@ function PageTransition({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  return <PageTransition><Switch>
-    <Route path="/" component={Home} />
-    <Route path="/career" component={Career} />
-    <Route path="/awards-certificates" component={AwardsCertificates} />
-    <Route path="/expertise" component={Expertise} />
-    <Route path="/contact" component={Contact} />
-    <Route component={NotFound} />
-  </Switch></PageTransition>;
+  return (
+    <AuthProvider>
+      <PageTransition>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/career" component={Career} />
+          <Route path="/awards-certificates" component={AwardsCertificates} />
+          <Route path="/expertise" component={Expertise} />
+          <Route path="/contact" component={Contact} />
+          <Route component={NotFound} />
+        </Switch>
+      </PageTransition>
+    </AuthProvider>
+  );
 }
