@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ishratzahan.ai.studio/sitemap.xml
+Sitemap: https://www.ishratzahan.online/sitemap.xml
