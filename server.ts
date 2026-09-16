@@ -24,12 +24,12 @@ async function startServer() {
 
   // Get current portrait status
   app.get("/api/portrait", (_req, res) => {
-    const targetFile = path.join(process.cwd(), "client/public/storage/ishrat-zahan-portrait_7e992ace.jpg");
+    const targetFile = path.join(process.cwd(), "client/public/storage/portrait.jpg");
     if (fs.existsSync(targetFile)) {
       const stats = fs.statSync(targetFile);
-      res.json({ exists: true, url: `/storage/ishrat-zahan-portrait_7e992ace.jpg?t=${stats.mtimeMs}` });
+      res.json({ exists: true, url: `/storage/portrait.jpg?t=${stats.mtimeMs}` });
     } else {
-      res.json({ exists: false, url: "/storage/ishrat-zahan-portrait_7e992ace.jpg" });
+      res.json({ exists: false, url: "/storage/portrait.jpg" });
     }
   });
 
@@ -45,7 +45,7 @@ async function startServer() {
 
       const destDir = path.join(process.cwd(), "client/public/storage");
       await fs.promises.mkdir(destDir, { recursive: true });
-      const targetFile = path.join(destDir, "ishrat-zahan-portrait_7e992ace.jpg");
+      const targetFile = path.join(destDir, "portrait.jpg");
       await fs.promises.writeFile(targetFile, buffer);
 
       // Also copy to root public path and dist paths if existing
@@ -55,11 +55,11 @@ async function startServer() {
       const distDir = path.join(process.cwd(), "dist/storage");
       if (fs.existsSync(path.join(process.cwd(), "dist"))) {
         await fs.promises.mkdir(distDir, { recursive: true });
-        await fs.promises.writeFile(path.join(distDir, "ishrat-zahan-portrait_7e992ace.jpg"), buffer).catch(() => {});
+        await fs.promises.writeFile(path.join(distDir, "portrait.jpg"), buffer).catch(() => {});
         await fs.promises.writeFile(path.join(process.cwd(), "dist/ishrat-zahan-portrait.jpg"), buffer).catch(() => {});
       }
 
-      res.json({ success: true, url: `/storage/ishrat-zahan-portrait_7e992ace.jpg?t=${Date.now()}` });
+      res.json({ success: true, url: `/storage/portrait.jpg?t=${Date.now()}` });
     } catch (error: any) {
       console.error("Failed to save portrait:", error);
       res.status(500).json({ error: error.message || "Failed to save portrait" });
@@ -204,9 +204,18 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  // Only listen if not running on Vercel (Vercel uses the exported app)
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  }
+  
+  return app;
 }
 
-startServer();
+const appPromise = startServer();
+export default async function (req: any, res: any) {
+  const app = await appPromise;
+  return app(req, res);
+}

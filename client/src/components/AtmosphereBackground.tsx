@@ -192,6 +192,14 @@ export default function AtmosphereBackground({ className = "", density = "normal
       lineGeometry.dispose();
       lineMaterial.dispose();
       materials.forEach((m) => m.dispose());
+      
+      // Force lose the WebGL context to prevent hitting browser limits on navigation
+      const gl = renderer.getContext();
+      if (gl) {
+        const extension = gl.getExtension('WEBGL_lose_context');
+        if (extension) extension.loseContext();
+      }
+      
       renderer.dispose();
       if (renderer.domElement.parentElement === container) {
         container.removeChild(renderer.domElement);
