@@ -39,7 +39,7 @@ export default function About() {
             <TiltCard maxTilt={8} liftDepth={20} className="bg-white border border-[#e5ded4] p-4 sm:p-5 w-full shadow-2xl shadow-black/10 rounded-2xl">
               <div className="w-full aspect-[3/4] bg-[#f5f2eb] rounded-xl overflow-hidden relative group">
                 <img 
-                  src="/storage/ishrat-zahan-portrait_7e992ace.jpg" 
+                  src="/ishrat-jahan-portrait.jpg" 
                   alt="Mst. Ishrat Zahan - Senior Public Administrator & Food Safety Compliance Expert" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out opacity-95 group-hover:opacity-100" 
                 />

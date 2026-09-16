@@ -20,9 +20,11 @@ export default function Navigation() {
       {/* Luxury Glass masthead */}
       <div className="bg-[#faf8f5]/90 backdrop-blur-xl border border-[#ebe5dc] shadow-lg shadow-black/[0.03] rounded-full px-5 sm:px-7 py-3 flex items-center justify-between mx-auto max-w-7xl pointer-events-auto transition-all duration-300">
         <Link href="/" className="inline-flex items-center gap-3 no-underline text-[#121615] group" aria-label="Home">
-          <span className="w-8 h-8 rounded-full bg-[#121615] text-[#fbfaf7] flex items-center justify-center font-serif text-xs font-semibold tracking-wider group-hover:bg-[#1d4a38] transition-colors duration-300 shadow-sm">
-            IZ
-          </span>
+          <img 
+            src="/logo.png" 
+            alt="Mst. Ishrat Zahan Logo" 
+            className="w-8 h-8 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
+          />
           <div className="flex flex-col">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#121615] leading-tight">
               Ishrat Zahan
